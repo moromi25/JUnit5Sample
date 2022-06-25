@@ -1,8 +1,5 @@
 package main;
 
-import static main.constant.EnumCommonConfig.UNUSE;
-import static main.constant.EnumCommonConfig.USE;
-
 import main.constant.EnumCommonConfig;
 import main.constant.UserConfigConst;
 import main.provider.SystemDefaultCommonConfigProvider;
@@ -15,12 +12,17 @@ public class FunctionAuthManager {
 		case USE, UNUSE -> false;
 		case DEPEND_ON_EMPLOYEE -> true;
 		case UNDEFINED -> {
-			EnumCommonConfig def = EnumCommonConfig.find(provider.getDefaultVal());
-			if (def == EnumCommonConfig.UNDEFINED)
-				throw new IllegalArgumentException("Illegal default config value: " + def);
+			EnumCommonConfig def = config.find(provider.getDefaultVal());
+			if (def == EnumCommonConfig.UNDEFINED) {
+				System.err.println("Illegal default config value: " + def);
+				yield false;
+			}
 			yield canManageEachConfigByEmployee(def, provider);
 		}
-		default -> throw new IllegalArgumentException("Unexpected value: " + config);
+		default -> {
+			System.err.println("Unexpected value: " + config);
+			yield false;
+		}
 		};
 	}
 
@@ -37,7 +39,7 @@ public class FunctionAuthManager {
 			yield false;
 		case UNDEFINED:
 			// 未設定の場合、システムデフォルト値をセットして再確認
-			EnumCommonConfig systemCommonConfig = EnumCommonConfig.find(vo.getSystemDefaultVal());
+			EnumCommonConfig systemCommonConfig = vo.getCommonConfig().find(vo.getSystemDefaultVal());
 			// あり得ないけど念のため無限ループ回避
 			if (systemCommonConfig == EnumCommonConfig.UNDEFINED) {
 				System.err.println("Please confirm system default config.");
