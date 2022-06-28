@@ -19,7 +19,7 @@ public enum EnumCommonConfig {
 		return val;
 	}
 
-	public EnumCommonConfig find(int val) {
+	public static EnumCommonConfig find(int val) {
 		Optional<EnumCommonConfig> config = Arrays.asList(EnumCommonConfig.values()).stream()
 				.filter(c -> c.getVal() == val).findAny();
 		if (config.isPresent()) {
