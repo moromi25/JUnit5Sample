@@ -1,121 +1,54 @@
-# 実際に書いたテスト
-## テスト対象の機能の仕様
-- あるサービスへのアクセス可否をチェックするメソッドのテスト
-    - 管理者が設定できる共通設定と、各社員が設定できるユーザー設定が存在する
-    - 管理者は全社一律で利用可否をコントロールできるほか、各社員に利用有無の設定を任せることができる
+# テスト対象の機能
+サービスAへのアクセス権限管理機能
 
-## ソース上での設定の持ち方
-- 共通設定の設定値は4パターン。以下のようなEnumを用意して定義している
-```EnumCommonConfig.java
-public enum EnumCommonConfig{
-    UNDEFINED(-1),// 共通設定が未設定
-    UNUSE(0),// 全社一律で利用しない
-    USE(1),// 全社一律で利用する
-    DEPEND_ON_EMPLOYEE(2);// 社員に設定を委ねる
 
-    private final int val;
+# 仕様
+管理者が設定できる全社共通設定と、各社員が設定できる社員個別設定が存在する
 
-    private EnumCommonConfig(int val) {
-        this.val = val;
-    }
+## 全社共通設定
+管理者は以下のいずれかの設定を行う
+- 0: サービスAを全社一律で利用しない
+- 1: サービスAを全社一律で利用する
+- 2: サービスAの利用設定は各社員に移譲する
 
-    public int getVal() {
-        return val;
-    }
-}
-```
-- 社員個別設定は`0: 利用しない` と `1: 利用する` の2パターン
-    - 製品の歴史上、やむを得ず以下のような感じで定数を集めたjavaに定義。。というレガシーコードあるある
-```java
-    private static final int EMPLOYEE_CONFIG_UNUSE = 0;
-    private static final int EMPLOYEE_CONFIG_USE = 1;
-```
+### 管理者による全社共通設定がされていない場合
+サービスプロバイダーが提供しているシステム設定を利用する
+区分値はユーザーによる全社共通設定と同様だが、諸々の歴史的背景から、クライアント企業のサービス利用バージョンに応じてシステム設定値が異なる
 
-## テストコードで満たしたい要件
-- 共通設定の設定値に応じて利用可否のboolean値を返すメソッド：canManageEachConfigByEmployeeが正しく動作するか
-    1. 管理者が設定した共通設定が2の場合に、メソッド：canManageEachConfigByEmployeeがtrueになるか
-    1. 管理者が設定した共通設定が0または1の場合に、メソッド：canManageEachConfigByEmployeeがfalseになるか
-    1. 管理者が共通設定を未設定の場合に、メソッド：canManageEachConfigByEmployeeがシステムデフォルト共通設定に応じたboolean値を返すか。なお、システムデフォルト共通設定の設定値は製品の利用歴に応じて0または2のいずれかが入る
-- ※社員個別設定のテストについては記載省略
-- サービスアクセス可否を判断するためのメソッド：がcanUseSerciceが正しく動作するか
-    1. 管理者による共通設定がされていない、かつ共通設定のシステムデフォルト値が0の場合
-    1. 管理者による共通設定がされていない、かつ共通設定のシステムデフォルト値が2の場合
-    1. 管理者による共通設定が1の場合
-    1. 管理者による共通設定が2の場合
-    1. 管理者による共通設定が3の場合、かつ社員個別設定が存在しない場合
-    1. 管理者による共通設定が4の場合、かつ社員個別設定が存在しない場合
-    1. 管理者による共通設定が3または4の場合、かつ社員個別設定が0の場合
-    1. 管理者による共通設定が3または4の場合、かつ社員個別設定が1の場合
+## 社員個別設定
+社員にサービスAの利用設定権限が委譲されている場合、各社員は以下のいずれかの設定を行う
+- 0: その社員がサービスAを利用しない
+- 1: その社員がサービスAを利用する
 
-前置き長くなりましたが、いよいよテスト書き始めます！
+### 社員による個別設定がされていない場合
+「0: その社員がサービスAを利用しない」が適用される
 
-# テストコードを書く
-## 共通設定に関するテスト
-この3パターンをテストしていきます。
-```
-1. 管理者が設定した共通設定が2の場合に、メソッド：canManageEachConfigByEmployeeがtrueになるか
-2. 管理者が設定した共通設定が0または1の場合に、メソッド：canManageEachConfigByEmployeeがfalseになるか
-3. 管理者が共通設定を未設定の場合に、メソッド：canManageEachConfigByEmployeeがシステムデフォルト共通設定に応じたboolean値を返すか
-   なお、システムデフォルト共通設定の設定値は製品の利用歴に応じて0または2のいずれかが入る
-```
-## サービスアクセス可否テスト
 
-## 実際のソースコード
-テストの書き方はいくつかありそうですが、今回私が書いたコードがこちら
-```canUseServiceTest.java
-class canUseServiceTest extends canUseService {
-    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-    @Nested
-    @DisplayName("共通設定に関するテスト")
-    class CanManageEachConfigByEmployeeTest{
 
-        // システムデフォルト設定を返してくれるクラス
-        private SystemDefaultCommonConfigProvider mockedDefaultConfigProvider;
+# テストで満たしたい要件
+## 共通設定による社員個別設定可否
+1. 共通設定が「0: サービスAを全社一律で利用しない」の場合、社員個別設定が【不可】である
+1. 共通設定が「1: サービスAを全社一律で利用する」の場合、社員個別設定が【不可】である
+1. 共通設定が「2: サービスAの利用設定は各社員に移譲する」の場合、社員個別設定が【可能】である
+1. 共通設定が「未設定」の場合、システム設定を利用して社員個別設定の可否を判定するか
+	1. システム設定が「0: サービスAを全社一律で利用しない」の場合、社員個別設定が【不可】である
+	1. システム設定が「1: サービスAを全社一律で利用する」の場合、社員個別設定が【不可】である
+	1. システム設定が「2: サービスAの利用設定は各社員に移譲する」の場合、社員個別設定が【可能】である
+	1. システム設定が「未設定」の場合、社員個別設定が【不可】である
+		※異常値であるが、エラーメッセージを出力するが処理は止めない
 
-        @BeforeAll
-        public void setup() {
-            mockedDefaultConfigProvider= spy(new SystemDefaultCommonConfigProvider());
-        }
-
-        @Test
-        @DisplayName("管理者が設定した共通設定が2の場合に、メソッド：canManageEachConfigByEmployeeがtrueになるか")
-        void testWithCommonConfigUseOrOnuse() {
-            assertTrue(canManageEachConfigByEmployee(DEPEND_ON_EMPLOYEE, mockedDefaultConfigProvider));
-        }
-
-        @ParameterizedTest
-        @EnumSource(value = EnumCommonConfig.class, names = { "UNUSE", "USE" })
-        @DisplayName("管理者が設定した共通設定が0または1の場合に、メソッド：canManageEachConfigByEmployeeがfalseになるか")
-        void testWithCommonConfigUseOrOnuse(EnumCommonConfig commonConfig) {
-            assertFalse(canManageEachConfigByEmployee(commonConfig, mockedDefaultConfigProvider));
-        }
-
-        @ParameterizedTest
-        @DisplayName("管理者が共通設定を未設定の場合に、メソッド：canManageEachConfigByEmployeeがシステムデフォルト共通設定に応じたboolean値を返すか")
-        @CsvSource({
-                "UNDEFINED, UNUSE",
-                "UNDEFINED, DEPEND_ON_EMPLOYEE",
-                "UNDEFINED, USE", // 通常ありえないはずだが念のためテスト
-                "UNDEFINED, UNDEFINED" // 通常ありえないはずだが念のためテスト
-        })
-        void testWithCommonConfigUndefined(EnumCommonConfig commonConfig, EnumCommonConfig systemDefaultCommonConfig) {
-            assertTrue(commonConfig== UNDEFINED);
-
-            when(mockedDefaultConfigProvider.getDefaultVal()).thenReturn(systemDefaultCommonConfig.getVal());
-
-            switch (systemDefaultCommonConfig) {
-            case UNUSE:
-            case USE:
-                assertFalse(canManageEachConfigByEmployee(commonConfig, mockedDefaultConfigProvider));
-                break;
-            case UNDEFINED:
-                // システムデフォルトが万一存在しなかった場合、ExceptionではなくsysErrが返ってくるかを確認
-                assertDoesNotThrow(() -> canManageEachConfigByEmployee(commonConfig, mockedDefaultConfigProvider));
-                break;
-            default:
-                break;
-            }
-        }
-    }
-}
-```
+## 社員XのサービスAへのアクセス可否
+1. 共通設定が「0: サービスAを全社一律で利用しない」の場合、社員XはサービスAへのアクセスが【不可】である
+1. 共通設定が「1: サービスAを全社一律で利用する」の場合、社員XはサービスAへのアクセスが【可能】である
+1. 共通設定が「2: サービスAの利用設定は各社員に移譲する」の場合
+	1. 社員Xによる社員個別設定が「0: その社員がサービスAを利用しない」の場合、社員XはサービスAへのアクセスが【不可】である
+	1. 社員Xによる社員個別設定が「1: その社員がサービスAを利用する」の場合、社員XはサービスAへのアクセスが【可能】である
+	1. 社員Xによる社員個別設定が「未設定」の場合、社員XはサービスAへのアクセスが【不可】である
+1. 共通設定が「未設定」の場合
+	1. システム設定が「0: サービスAを全社一律で利用しない」の場合、社員XはサービスAへのアクセスが【不可】である
+	1. システム設定が「1: サービスAを全社一律で利用する」の場合、社員XはサービスAへのアクセスが【可能】である
+	1. システム設定が「2: サービスAの利用設定は各社員に移譲する」の場合
+		1. 社員Xによる社員個別設定が「0: その社員がサービスAを利用しない」の場合、社員XはサービスAへのアクセスが【不可】である
+		1. 社員Xによる社員個別設定が「1: その社員がサービスAを利用する」の場合、社員XはサービスAへのアクセスが【可能】である
+		1. 社員Xによる社員個別設定が「未設定」の場合、社員XはサービスAへのアクセスが【不可】である
+	1. システム設定が「未設定」の場合、社員XはサービスAへのアクセスが【不可】である

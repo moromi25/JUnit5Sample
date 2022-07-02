@@ -1,5 +1,5 @@
 package main.repo;
 
 public interface DefaultCommonConfigRepository {
-	public int find();
+	public int getDefaultVal();
 }

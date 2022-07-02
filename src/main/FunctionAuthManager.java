@@ -12,7 +12,7 @@ public class FunctionAuthManager {
 		case USE, UNUSE -> false;
 		case DEPEND_ON_EMPLOYEE -> true;
 		case UNDEFINED -> {
-			EnumCommonConfig def = EnumCommonConfig.find(provider.getDefault());
+			EnumCommonConfig def = EnumCommonConfig.find(provider.getDefaultVal());
 			if (def == EnumCommonConfig.UNDEFINED) {
 				System.err.println("Illegal default config value: " + def);
 				yield false;

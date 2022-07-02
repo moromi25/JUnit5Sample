@@ -1,13 +1,17 @@
 package main.provider;
 
+import main.repo.DefaultCommonConfigRepoSitoryImpl;
 import main.repo.DefaultCommonConfigRepository;
 
 public class CommonConfigProvider {
 
-	/** TODO èâä˙âª */
 	private DefaultCommonConfigRepository repo;
 
-	public int getDefault() {
-		return repo.find();
+	public CommonConfigProvider() {
+		repo = new DefaultCommonConfigRepoSitoryImpl();
+	}
+	
+	public int getDefaultVal() {
+		return repo.getDefaultVal();
 	}
 }
