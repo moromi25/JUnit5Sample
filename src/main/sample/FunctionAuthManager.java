@@ -1,9 +1,9 @@
-package main;
+package main.sample;
 
-import main.constant.EnumCommonConfig;
-import main.constant.UserConfigConst;
-import main.provider.CommonConfigProvider;
-import main.vo.UseServiceConfigVo;
+import main.sample.constant.EnumCommonConfig;
+import main.sample.constant.UserConfigConst;
+import main.sample.provider.CommonConfigProvider;
+import main.sample.vo.UseServiceConfigVo;
 
 public class FunctionAuthManager {
 

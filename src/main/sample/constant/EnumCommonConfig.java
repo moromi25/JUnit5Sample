@@ -1,4 +1,4 @@
-package main.constant;
+package main.sample.constant;
 
 import java.util.Arrays;
 import java.util.Optional;

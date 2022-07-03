@@ -1,7 +1,7 @@
-package main.provider;
+package main.sample.provider;
 
-import main.repo.DefaultCommonConfigRepoSitoryImpl;
-import main.repo.DefaultCommonConfigRepository;
+import main.sample.repo.DefaultCommonConfigRepoSitoryImpl;
+import main.sample.repo.DefaultCommonConfigRepository;
 
 public class CommonConfigProvider {
 

@@ -1,6 +1,6 @@
-package main.vo;
+package main.sample.vo;
 
-import main.constant.EnumCommonConfig;
+import main.sample.constant.EnumCommonConfig;
 
 public class UseServiceConfigVo {
 

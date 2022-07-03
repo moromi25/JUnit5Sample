@@ -1,6 +1,6 @@
-package main.repo;
+package main.sample.repo;
 
-import main.constant.EnumCommonConfig;
+import main.sample.constant.EnumCommonConfig;
 
 public class DefaultCommonConfigRepoSitoryImpl implements DefaultCommonConfigRepository {
 

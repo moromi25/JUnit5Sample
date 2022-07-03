@@ -1,9 +1,9 @@
-package test.main;
+package test.sample;
 
-import static main.constant.EnumCommonConfig.DEPEND_ON_EMPLOYEE;
-import static main.constant.EnumCommonConfig.UNDEFINED;
-import static main.constant.EnumCommonConfig.UNUSE;
-import static main.constant.EnumCommonConfig.USE;
+import static main.sample.constant.EnumCommonConfig.DEPEND_ON_EMPLOYEE;
+import static main.sample.constant.EnumCommonConfig.UNDEFINED;
+import static main.sample.constant.EnumCommonConfig.UNUSE;
+import static main.sample.constant.EnumCommonConfig.USE;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -24,35 +24,35 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import main.FunctionAuthManager;
-import main.constant.EnumCommonConfig;
-import main.constant.UserConfigConst;
-import main.provider.CommonConfigProvider;
-import main.vo.UseServiceConfigVo;
+import main.sample.FunctionAuthManager;
+import main.sample.constant.EnumCommonConfig;
+import main.sample.constant.UserConfigConst;
+import main.sample.provider.CommonConfigProvider;
+import main.sample.vo.UseServiceConfigVo;
 
 @DisplayName("設定権限に関するテスト")
-public class FunctionAuthManagerTest extends FunctionAuthManager {
+class FunctionAuthManagerTest extends FunctionAuthManager {
 
 	@Nested
 	@DisplayName("共通設定に関するテスト")
-	public class CanManageEachConfigByEmployeeTest {
+	class CanManageEachConfigByEmployeeTest {
 		@Nested
 		@DisplayName("パターン1：assertTrue/Falseを使ったシンプルなテスト")
-		public class CanManageEachConfigByEmployeeTest_pattern1 {
+		class CanManageEachConfigByEmployeeTest_pattern1 {
 
 			/** デフォルト設定を返してくれるクラス */
 			private CommonConfigProvider mockedDefaultConfigProvider;
 
 			@Test
 			@DisplayName("DEPEND_ON_EMPLOYEEを渡したらtrueを返すか")
-			public void withCommonConfigDependOnEmployee() {
+			void withCommonConfigDependOnEmployee() {
 				assertTrue(canManageEachConfigByEmployee(DEPEND_ON_EMPLOYEE, mockedDefaultConfigProvider));
 			}
 
 			@ParameterizedTest
 			@EnumSource(value = EnumCommonConfig.class, names = { "UNUSE", "USE" })
 			@DisplayName("UNUSEまたはUSEを渡したらtrueを返すか")
-			public void withCommonConfigUseOrUnuse(EnumCommonConfig commonConfig) {
+			void withCommonConfigUseOrUnuse(EnumCommonConfig commonConfig) {
 				assertFalse(canManageEachConfigByEmployee(commonConfig, mockedDefaultConfigProvider));
 			}
 
@@ -61,7 +61,7 @@ public class FunctionAuthManagerTest extends FunctionAuthManager {
 			@CsvSource({ "UNUSE", "DEPEND_ON_EMPLOYEE", "USE", // 通常ありえないはずだが念のためテスト
 					"UNDEFINED" // 通常ありえないはずだが念のためテスト
 			})
-			public void withCommonConfigUndefined(EnumCommonConfig defaultCommonConfig) {
+			void withCommonConfigUndefined(EnumCommonConfig defaultCommonConfig) {
 				mockedDefaultConfigProvider = mock(CommonConfigProvider.class);
 				when(mockedDefaultConfigProvider.getDefaultVal()).thenReturn(defaultCommonConfig.getVal());
 				// デフォルト設定が万一存在しなかった場合でもExceptionが発生しないように
@@ -79,27 +79,27 @@ public class FunctionAuthManagerTest extends FunctionAuthManager {
 
 		@Nested
 		@DisplayName("パターン2：UNDEFINEDとそれ以外を分けてテスト")
-		public class CanManageEachConfigByEmployeeTest_pattern2 {
+		class CanManageEachConfigByEmployeeTest_pattern2 {
 
 			private CommonConfigProvider mockedDefaultConfigProvider;
 
 			@ParameterizedTest
 			@DisplayName("EnumCommonConfigのパターンテスト(UNDEFINED以外)")
 			@CsvSource({ "USE, false", "UNUSE, false", "DEPEND_ON_EMPLOYEE, true" })
-			public void withCommonConfig(EnumCommonConfig config, boolean expected) {
+			void withCommonConfig(EnumCommonConfig config, boolean expected) {
 				assertThat(canManageEachConfigByEmployee(config, null), is(expected));
 			}
 
 			@ParameterizedTest
 			@DisplayName("UNDEFINED時にシステムデフォルト値を使って判定できるかテスト")
 			@MethodSource("defaultConfigPatternsProvider")
-			public void withCommonConfigUndefined(EnumCommonConfig def, boolean expected) {
+			void withCommonConfigUndefined(EnumCommonConfig def, boolean expected) {
 				mockedDefaultConfigProvider = mock(CommonConfigProvider.class);
 				when(mockedDefaultConfigProvider.getDefaultVal()).thenReturn(def.getVal());
 				assertThat(canManageEachConfigByEmployee(UNDEFINED, mockedDefaultConfigProvider), is(expected));
 			}
 
-			public static Stream<Arguments> defaultConfigPatternsProvider() {
+			static Stream<Arguments> defaultConfigPatternsProvider() {
 				return Stream.of(arguments(USE, false), arguments(UNUSE, false), arguments(DEPEND_ON_EMPLOYEE, true),
 						arguments(UNDEFINED, false)// 異常値テスト
 				);
@@ -109,10 +109,10 @@ public class FunctionAuthManagerTest extends FunctionAuthManager {
 
 		@Nested
 		@DisplayName("パターン3：全部まとめて1つのメソッドでテスト")
-		public class CanManageEachConfigByEmployeeTest_pattern3 {
+		class CanManageEachConfigByEmployeeTest_pattern3 {
 			@ParameterizedTest
 			@MethodSource({ "exceptUndefinedProvider", "undefinedProvider" })
-			public void withCanManageEachConfigByEmployee(String description, EnumCommonConfig config,
+			void withCanManageEachConfigByEmployee(String description, EnumCommonConfig config,
 					CommonConfigProvider provider, boolean expected) {
 				assertThat(canManageEachConfigByEmployee(config, provider), is(expected));
 			}
@@ -145,12 +145,12 @@ public class FunctionAuthManagerTest extends FunctionAuthManager {
 
 	@Nested
 	@DisplayName("共通設定×ユーザー設定を加味したサービスアクセス可否テスト")
-	public class CanUseServiceTest {
+	class CanUseServiceTest {
 
 		@ParameterizedTest(name = "{index} ==> [期待結果：{1}] {2}")
 		@MethodSource({ "authTypeUseOrUnusePatternsProvider", "authTypeDependOnBossPatternsProvider" })
 		@DisplayName("canUseSerciceが共通設定とユーザー設定双方の利用設定を読んで表示制御できているか")
-		public void withComAuthTypeUndefined(UseServiceConfigVo vo, boolean expected, String description) {
+		void withComAuthTypeUndefined(UseServiceConfigVo vo, boolean expected, String description) {
 			assertThat(canUseService(vo), is(expected));
 		}
 
@@ -158,7 +158,7 @@ public class FunctionAuthManagerTest extends FunctionAuthManager {
 		 * @return ・共通設定がUNUSEの場合<br>
 		 *         ・共通設定がUSEの場合
 		 */
-		public static Stream<Arguments> authTypeUseOrUnusePatternsProvider() {
+		static Stream<Arguments> authTypeUseOrUnusePatternsProvider() {
 			return Stream.of(
 					arguments(
 							new UseServiceConfigVo.Builder().commonConfig(UNUSE).systemDefaultVal(USE.getVal())
@@ -174,7 +174,7 @@ public class FunctionAuthManagerTest extends FunctionAuthManager {
 		 *         ・共通設定がDEPEND_ON_EMPLOYEE×ユーザー設定がUSEの場合<br>
 		 *         ・共通設定がDEPEND_ON_EMPLOYEE×ユーザー設定が存在しない場合
 		 */
-		public static Stream<Arguments> authTypeDependOnBossPatternsProvider() {
+		static Stream<Arguments> authTypeDependOnBossPatternsProvider() {
 			return Stream.of(arguments(
 					new UseServiceConfigVo.Builder().commonConfig(DEPEND_ON_EMPLOYEE).systemDefaultVal(USE.getVal())
 							.existsUserConfig(true).userConfigVal(UserConfigConst.EMPLOYEE_CONFIG_UNUSE).build(),

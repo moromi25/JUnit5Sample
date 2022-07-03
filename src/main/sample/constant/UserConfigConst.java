@@ -1,4 +1,4 @@
-package main.constant;
+package main.sample.constant;
 
 /**
  * レガシーコードにありがちな定数をまとめるためのクラス
